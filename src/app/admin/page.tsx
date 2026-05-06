@@ -1,12 +1,25 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Badge } from '@/components/ui/badge'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { supabase } from '@/lib/supabase'
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+type MatchSummary = { score: number; status: string }
+
+type Senior = {
+  id: string
+  name: string
+  region: string
+  desired_job: string
+  career_years: number
+  matches: MatchSummary[]
+}
 
 type Job = {
   id: string
@@ -16,27 +29,52 @@ type Job = {
   required_career: number
 }
 
-const REGIONS = ['서울', '경기', '인천', '기타'] as const
-const JOB_TYPES = ['경비', '청소', '조리', '돌봄', '기타'] as const
-
-const KANBAN_COLUMNS = [
-  { id: 'unmatched', label: '미매칭', color: 'bg-red-50 border-red-200', badgeClass: 'bg-red-100 text-red-800' },
-  { id: 'pending', label: '매칭 대기', color: 'bg-yellow-50 border-yellow-200', badgeClass: 'bg-yellow-100 text-yellow-800' },
-  { id: 'assigned', label: '배정 완료', color: 'bg-green-50 border-green-200', badgeClass: 'bg-green-100 text-green-800' },
-]
+type DerivedStatus = 'unmatched' | 'pending' | 'assigned'
 
 type JobFormErrors = Partial<Record<'title' | 'region' | 'job_type', string>>
 
-const SELECT_CLS = (hasError: boolean) =>
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function getSeniorStatus(matches: MatchSummary[]): DerivedStatus {
+  if (!matches || matches.length === 0 || matches.every((m) => m.score === 0))
+    return 'unmatched'
+  if (matches.some((m) => m.status === 'assigned' || m.status === 'done'))
+    return 'assigned'
+  return 'pending'
+}
+
+function getMaxScore(matches: MatchSummary[]): number {
+  if (!matches || matches.length === 0) return 0
+  return Math.max(...matches.map((m) => m.score))
+}
+
+function statusInfo(s: DerivedStatus): { label: string; cls: string } {
+  if (s === 'assigned') return { label: '배정 완료', cls: 'bg-green-100 text-green-800' }
+  if (s === 'pending') return { label: '매칭 대기', cls: 'bg-yellow-100 text-yellow-800' }
+  return { label: '미매칭', cls: 'bg-gray-100 text-gray-600' }
+}
+
+const REGIONS = ['서울', '경기', '인천', '기타'] as const
+const JOB_TYPES = ['경비', '청소', '조리', '돌봄', '기타'] as const
+
+const SELECT_CLS = (err: boolean) =>
   `w-full h-12 text-lg border-2 rounded-lg px-3 bg-white focus:outline-none focus:border-blue-500 ${
-    hasError ? 'border-red-400' : 'border-gray-300'
+    err ? 'border-red-400' : 'border-gray-300'
   }`
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function AdminPage() {
+  // Seniors
+  const [seniors, setSeniors] = useState<Senior[]>([])
+  const [loadingSeniors, setLoadingSeniors] = useState(true)
+
+  // Jobs
   const [jobs, setJobs] = useState<Job[]>([])
   const [loadingJobs, setLoadingJobs] = useState(true)
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
 
+  // Add-job form
   const [jobTitle, setJobTitle] = useState('')
   const [jobRegion, setJobRegion] = useState('')
   const [jobType, setJobType] = useState('')
@@ -45,6 +83,17 @@ export default function AdminPage() {
   const [jobSuccess, setJobSuccess] = useState(false)
   const [jobAdding, setJobAdding] = useState(false)
 
+  // ─── Fetch ─────────────────────────────────────────────────────────────────
+
+  const fetchSeniors = useCallback(async () => {
+    setLoadingSeniors(true)
+    const { data } = await supabase
+      .from('seniors')
+      .select('*, matches(score, status)')
+    setLoadingSeniors(false)
+    if (data) setSeniors(data as Senior[])
+  }, [])
+
   const fetchJobs = useCallback(async () => {
     setLoadingJobs(true)
     const { data } = await supabase.from('jobs').select('*')
@@ -52,7 +101,24 @@ export default function AdminPage() {
     if (data) setJobs(data)
   }, [])
 
-  useEffect(() => { fetchJobs() }, [fetchJobs])
+  useEffect(() => {
+    fetchSeniors()
+    fetchJobs()
+  }, [fetchSeniors, fetchJobs])
+
+  // ─── Computed stats ────────────────────────────────────────────────────────
+
+  const unmatchedCount = seniors.filter(
+    (s) => getSeniorStatus(s.matches) === 'unmatched'
+  ).length
+  const pendingCount = seniors.filter(
+    (s) => getSeniorStatus(s.matches) === 'pending'
+  ).length
+  const assignedCount = seniors.filter(
+    (s) => getSeniorStatus(s.matches) === 'assigned'
+  ).length
+
+  // ─── Job handlers ──────────────────────────────────────────────────────────
 
   const validateJobForm = (): boolean => {
     const e: JobFormErrors = {}
@@ -69,17 +135,25 @@ export default function AdminPage() {
     if (!validateJobForm()) return
 
     setJobAdding(true)
-    const { error } = await supabase.from('jobs').insert({
-      title: jobTitle.trim(),
-      region: jobRegion,
-      job_type: jobType,
-      required_career: jobCareer ? parseInt(jobCareer, 10) : 0,
-    })
+    const { data: inserted, error } = await supabase
+      .from('jobs')
+      .insert({
+        title: jobTitle.trim(),
+        region: jobRegion,
+        job_type: jobType,
+        required_career: jobCareer ? parseInt(jobCareer, 10) : 0,
+      })
+      .select('id')
+      .single()
     setJobAdding(false)
 
     if (error) {
       setJobFormErrors({ title: `저장 오류: ${error.message}` })
       return
+    }
+
+    if (inserted) {
+      await supabase.rpc('recalculate_matches_for_job', { p_job_id: inserted.id })
     }
 
     setJobSuccess(true)
@@ -88,7 +162,7 @@ export default function AdminPage() {
     setJobType('')
     setJobCareer('')
     setJobFormErrors({})
-    fetchJobs()
+    await Promise.all([fetchJobs(), fetchSeniors()])
   }
 
   const handleDeleteJob = async (id: string) => {
@@ -100,52 +174,137 @@ export default function AdminPage() {
       return next
     })
     setJobs((prev) => prev.filter((j) => j.id !== id))
+    fetchSeniors() // cascade 삭제된 matches 반영
   }
+
+  // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div className="max-w-6xl mx-auto">
       <h1 className="text-4xl font-bold mb-2 text-gray-900">담당자 대시보드</h1>
       <p className="text-xl text-gray-600 mb-8">매칭 현황을 한눈에 확인하고 관리합니다.</p>
 
-      {/* 칸반 (매칭 로직 연동 전 플레이스홀더) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {KANBAN_COLUMNS.map((col) => (
-          <div key={col.id} className={`rounded-xl border-2 p-4 ${col.color}`}>
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-800">{col.label}</h2>
-              <Badge className={`text-lg px-3 py-1 font-bold rounded-full border-0 ${col.badgeClass}`}>
-                0건
-              </Badge>
-            </div>
-            <p className="text-gray-500 text-sm mt-1">매칭 로직 연동 후 표시</p>
-          </div>
+      {/* ── 집계 카드 3개 ─────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {[
+          {
+            label: '미매칭',
+            count: unmatchedCount,
+            sub: '매칭 없거나 전부 0점',
+            border: 'border-red-200 bg-red-50',
+            text: 'text-red-700',
+          },
+          {
+            label: '매칭 대기',
+            count: pendingCount,
+            sub: '매칭 있음 · pending',
+            border: 'border-yellow-200 bg-yellow-50',
+            text: 'text-yellow-700',
+          },
+          {
+            label: '배정 완료',
+            count: assignedCount,
+            sub: 'assigned / done',
+            border: 'border-green-200 bg-green-50',
+            text: 'text-green-700',
+          },
+        ].map((c) => (
+          <Card key={c.label} className={`border-2 ${c.border}`}>
+            <CardContent className="pt-6 pb-5">
+              <p className={`text-lg font-semibold ${c.text}`}>{c.label}</p>
+              <p className="text-5xl font-bold text-gray-900 mt-2">
+                {loadingSeniors ? '…' : c.count}
+              </p>
+              <p className="text-base text-gray-500 mt-1">{c.sub}</p>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      {/* 통계 요약 */}
-      <div className="mt-6 p-6 bg-blue-50 border-2 border-blue-200 rounded-xl">
-        <h3 className="text-xl font-bold text-blue-800 mb-3">통계 요약</h3>
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <p className="text-4xl font-bold text-gray-800">—</p>
-            <p className="text-lg text-gray-600 mt-1">전체 시니어</p>
-          </div>
-          <div>
-            <p className="text-4xl font-bold text-gray-800">
-              {loadingJobs ? '…' : jobs.length}
+      {/* ── 시니어 목록 테이블 ────────────────────────────────────── */}
+      <Card className="border-2 border-gray-200 shadow-md mb-8">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-2xl text-gray-800">
+            시니어 목록{' '}
+            {!loadingSeniors && (
+              <span className="text-gray-500 font-normal text-xl">
+                ({seniors.length}명)
+              </span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loadingSeniors ? (
+            <p className="text-gray-500 text-lg text-center py-8">불러오는 중...</p>
+          ) : seniors.length === 0 ? (
+            <p className="text-gray-500 text-lg text-center py-8">
+              등록된 시니어가 없습니다.
             </p>
-            <p className="text-lg text-gray-600 mt-1">등록 일자리</p>
-          </div>
-          <div>
-            <p className="text-4xl font-bold text-gray-800">—</p>
-            <p className="text-lg text-gray-600 mt-1">완료 매칭</p>
-          </div>
-        </div>
-      </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-lg">
+                <thead>
+                  <tr className="border-b-2 border-gray-200 bg-gray-50">
+                    <th className="text-left py-3 px-4 font-bold text-gray-700">이름</th>
+                    <th className="text-left py-3 px-4 font-bold text-gray-700">지역</th>
+                    <th className="text-left py-3 px-4 font-bold text-gray-700">희망 직종</th>
+                    <th className="text-left py-3 px-4 font-bold text-gray-700">최고 점수</th>
+                    <th className="text-left py-3 px-4 font-bold text-gray-700">상태</th>
+                    <th className="py-3 px-4"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {seniors.map((s) => {
+                    const status = getSeniorStatus(s.matches)
+                    const { label, cls } = statusInfo(status)
+                    const maxScore = getMaxScore(s.matches)
+                    return (
+                      <tr
+                        key={s.id}
+                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="py-4 px-4 font-semibold text-gray-900">
+                          {s.name}
+                        </td>
+                        <td className="py-4 px-4 text-gray-700">{s.region}</td>
+                        <td className="py-4 px-4 text-gray-700">{s.desired_job}</td>
+                        <td className="py-4 px-4">
+                          <span className="text-2xl font-bold text-gray-900">
+                            {maxScore}
+                          </span>
+                          <span className="text-gray-500 text-base ml-1">점</span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span
+                            className={`px-3 py-1 rounded-full text-base font-semibold ${cls}`}
+                          >
+                            {label}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <Link href={`/recommendations?senior_id=${s.id}`}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-base font-semibold border-2 border-blue-300 text-blue-700 hover:bg-blue-50"
+                            >
+                              상세 보기
+                            </Button>
+                          </Link>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <hr className="my-10 border-2 border-gray-200" />
 
-      {/* 일자리 관리 */}
+      {/* ── 일자리 관리 ───────────────────────────────────────────── */}
       <h2 className="text-3xl font-bold mb-6 text-gray-900">일자리 관리</h2>
 
       {/* 일자리 추가 폼 */}
@@ -160,7 +319,6 @@ export default function AdminPage() {
             </div>
           )}
           <form onSubmit={handleAddJob} className="space-y-4">
-            {/* 공고명 */}
             <div className="space-y-2">
               <Label htmlFor="job-title" className="text-lg font-semibold text-gray-800">
                 공고명 <span className="text-red-500">*</span>
@@ -183,7 +341,6 @@ export default function AdminPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* 지역 */}
               <div className="space-y-2">
                 <Label htmlFor="job-region" className="text-lg font-semibold text-gray-800">
                   지역 <span className="text-red-500">*</span>
@@ -200,11 +357,12 @@ export default function AdminPage() {
                   className={SELECT_CLS(!!jobFormErrors.region)}
                 >
                   <option value="">선택</option>
-                  {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+                  {REGIONS.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
                 </select>
               </div>
 
-              {/* 직종 */}
               <div className="space-y-2">
                 <Label htmlFor="job-type" className="text-lg font-semibold text-gray-800">
                   직종 <span className="text-red-500">*</span>
@@ -221,11 +379,12 @@ export default function AdminPage() {
                   className={SELECT_CLS(!!jobFormErrors.job_type)}
                 >
                   <option value="">선택</option>
-                  {JOB_TYPES.map((j) => <option key={j} value={j}>{j}</option>)}
+                  {JOB_TYPES.map((j) => (
+                    <option key={j} value={j}>{j}</option>
+                  ))}
                 </select>
               </div>
 
-              {/* 요구 경력 */}
               <div className="space-y-2">
                 <Label htmlFor="job-career" className="text-lg font-semibold text-gray-800">
                   요구 경력 (년)
@@ -267,7 +426,9 @@ export default function AdminPage() {
           {loadingJobs ? (
             <p className="text-gray-500 text-lg text-center py-8">불러오는 중...</p>
           ) : jobs.length === 0 ? (
-            <p className="text-gray-500 text-lg text-center py-8">등록된 일자리가 없습니다.</p>
+            <p className="text-gray-500 text-lg text-center py-8">
+              등록된 일자리가 없습니다.
+            </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-lg">
@@ -282,7 +443,10 @@ export default function AdminPage() {
                 </thead>
                 <tbody>
                   {jobs.map((job) => (
-                    <tr key={job.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <tr
+                      key={job.id}
+                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                    >
                       <td className="py-4 px-4 font-medium text-gray-900">{job.title}</td>
                       <td className="py-4 px-4 text-gray-700">{job.region}</td>
                       <td className="py-4 px-4 text-gray-700">{job.job_type}</td>

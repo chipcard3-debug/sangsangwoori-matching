@@ -41,17 +41,25 @@ export default function RegisterPage() {
     if (!validate()) return
 
     setSubmitting(true)
-    const { error } = await supabase.from('seniors').insert({
-      name: name.trim(),
-      region,
-      desired_job: desiredJob,
-      career_years: careerYears ? parseInt(careerYears, 10) : 0,
-    })
+    const { data: inserted, error } = await supabase
+      .from('seniors')
+      .insert({
+        name: name.trim(),
+        region,
+        desired_job: desiredJob,
+        career_years: careerYears ? parseInt(careerYears, 10) : 0,
+      })
+      .select('id')
+      .single()
     setSubmitting(false)
 
     if (error) {
       setErrors({ name: `저장 오류: ${error.message}` })
       return
+    }
+
+    if (inserted) {
+      await supabase.rpc('recalculate_matches_for_senior', { p_senior_id: inserted.id })
     }
 
     setSuccess(true)
