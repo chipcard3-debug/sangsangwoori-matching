@@ -1,0 +1,54 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "상상우리" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "프로필 등록" [ref=e6] [cursor=pointer]:
+          - /url: /register
+        - link "추천 목록" [ref=e7] [cursor=pointer]:
+          - /url: /recommendations
+        - link "관리자" [ref=e8] [cursor=pointer]:
+          - /url: /admin
+  - main [ref=e9]:
+    - generic [ref=e10]:
+      - heading "추천 일자리 목록" [level=1] [ref=e11]
+      - paragraph [ref=e12]: 매칭 점수 높은 순서로 표시됩니다.
+      - generic [ref=e13]:
+        - generic [ref=e14] [cursor=pointer]:
+          - generic [ref=e16]:
+            - generic [ref=e17]: "#1 일자리 제목 (준비 중)"
+            - generic [ref=e18]: 점수 95점
+          - generic [ref=e20]:
+            - generic [ref=e21]: "지역: — 준비 중 —"
+            - generic [ref=e22]: "직종: — 준비 중 —"
+            - generic [ref=e23]: "요구 경력: — 준비 중 —"
+            - generic [ref=e24]:
+              - text: "매칭 상태:"
+              - generic [ref=e25]: 미배정
+        - generic [ref=e26] [cursor=pointer]:
+          - generic [ref=e28]:
+            - generic [ref=e29]: "#2 일자리 제목 (준비 중)"
+            - generic [ref=e30]: 점수 87점
+          - generic [ref=e32]:
+            - generic [ref=e33]: "지역: — 준비 중 —"
+            - generic [ref=e34]: "직종: — 준비 중 —"
+            - generic [ref=e35]: "요구 경력: — 준비 중 —"
+            - generic [ref=e36]:
+              - text: "매칭 상태:"
+              - generic [ref=e37]: 미배정
+        - generic [ref=e38] [cursor=pointer]:
+          - generic [ref=e40]:
+            - generic [ref=e41]: "#3 일자리 제목 (준비 중)"
+            - generic [ref=e42]: 점수 76점
+          - generic [ref=e44]:
+            - generic [ref=e45]: "지역: — 준비 중 —"
+            - generic [ref=e46]: "직종: — 준비 중 —"
+            - generic [ref=e47]: "요구 경력: — 준비 중 —"
+            - generic [ref=e48]:
+              - text: "매칭 상태:"
+              - generic [ref=e49]: 미배정
+      - paragraph [ref=e50]: ※ 실제 데이터 연동 및 매칭 로직은 다음 단계에서 구현됩니다.
+  - contentinfo [ref=e51]: © 2026 상상우리. 시니어 일자리 매칭 시스템.
+  - button "Open Next.js Dev Tools" [ref=e57] [cursor=pointer]:
+    - img [ref=e58]

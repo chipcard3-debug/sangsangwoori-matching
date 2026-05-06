@@ -1,0 +1,72 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "상상우리" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "프로필 등록" [ref=e6] [cursor=pointer]:
+          - /url: /register
+        - link "추천 목록" [ref=e7] [cursor=pointer]:
+          - /url: /recommendations
+        - link "관리자" [ref=e8] [cursor=pointer]:
+          - /url: /admin
+  - main [ref=e9]:
+    - generic [ref=e10]:
+      - heading "담당자 대시보드" [level=1] [ref=e11]
+      - paragraph [ref=e12]: 매칭 현황을 한눈에 확인하고 관리합니다.
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - generic [ref=e16]:
+              - heading "미매칭" [level=2] [ref=e17]
+              - generic [ref=e18]: 0건
+            - paragraph [ref=e19]: 준비 중인 항목
+          - generic [ref=e20]:
+            - generic [ref=e21]:
+              - generic [ref=e23]: 항목 예시
+              - generic [ref=e24]:
+                - paragraph [ref=e25]: 시니어 이름 / 일자리 제목
+                - paragraph [ref=e26]: "매칭 점수: — 점"
+            - paragraph [ref=e27]: 데이터 연동 후 표시됩니다
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - generic [ref=e30]:
+              - heading "매칭 대기" [level=2] [ref=e31]
+              - generic [ref=e32]: 0건
+            - paragraph [ref=e33]: 준비 중인 항목
+          - generic [ref=e34]:
+            - generic [ref=e35]:
+              - generic [ref=e37]: 항목 예시
+              - generic [ref=e38]:
+                - paragraph [ref=e39]: 시니어 이름 / 일자리 제목
+                - paragraph [ref=e40]: "매칭 점수: — 점"
+            - paragraph [ref=e41]: 데이터 연동 후 표시됩니다
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - generic [ref=e44]:
+              - heading "배정 완료" [level=2] [ref=e45]
+              - generic [ref=e46]: 0건
+            - paragraph [ref=e47]: 준비 중인 항목
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - generic [ref=e51]: 항목 예시
+              - generic [ref=e52]:
+                - paragraph [ref=e53]: 시니어 이름 / 일자리 제목
+                - paragraph [ref=e54]: "매칭 점수: — 점"
+            - paragraph [ref=e55]: 데이터 연동 후 표시됩니다
+      - generic [ref=e56]:
+        - heading "통계 요약" [level=3] [ref=e57]
+        - generic [ref=e58]:
+          - generic [ref=e59]:
+            - paragraph [ref=e60]: —
+            - paragraph [ref=e61]: 전체 시니어
+          - generic [ref=e62]:
+            - paragraph [ref=e63]: —
+            - paragraph [ref=e64]: 등록 일자리
+          - generic [ref=e65]:
+            - paragraph [ref=e66]: —
+            - paragraph [ref=e67]: 완료 매칭
+      - paragraph [ref=e68]: ※ 실제 데이터 연동은 다음 단계에서 구현됩니다.
+  - contentinfo [ref=e69]: © 2026 상상우리. 시니어 일자리 매칭 시스템.
+  - button "Open Next.js Dev Tools" [ref=e75] [cursor=pointer]:
+    - img [ref=e76]

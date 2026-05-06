@@ -1,0 +1,37 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "상상우리" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "프로필 등록" [ref=e6] [cursor=pointer]:
+          - /url: /register
+        - link "추천 목록" [ref=e7] [cursor=pointer]:
+          - /url: /recommendations
+        - link "관리자" [ref=e8] [cursor=pointer]:
+          - /url: /admin
+  - main [ref=e9]:
+    - generic [ref=e10]:
+      - heading "시니어 프로필 등록" [level=1] [ref=e11]
+      - paragraph [ref=e12]: 정보를 입력하시면 맞춤 일자리를 추천해 드립니다.
+      - generic [ref=e13]:
+        - generic [ref=e15]: 기본 정보 입력
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - generic [ref=e18]: 이름
+            - textbox "이름" [disabled]:
+              - /placeholder: 홍길동
+          - generic [ref=e19]:
+            - generic [ref=e20]: 거주 지역
+            - textbox "거주 지역" [disabled]:
+              - /placeholder: 서울 강남구
+          - generic [ref=e21]:
+            - generic [ref=e22]: 희망 직종
+            - textbox "희망 직종" [disabled]:
+              - /placeholder: 경비원, 청소원, 요양보호사 등
+          - generic [ref=e23]:
+            - generic [ref=e24]: 경력 (년)
+            - spinbutton "경력 (년)" [disabled]
+          - button "프로필 등록하기" [disabled]
+          - paragraph [ref=e25]: ※ 기능은 다음 단계에서 구현됩니다.
+  - contentinfo [ref=e26]: © 2026 상상우리. 시니어 일자리 매칭 시스템.
