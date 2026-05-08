@@ -29,6 +29,12 @@ export default function RootLayout({
                 프로필 등록
               </Link>
               <Link
+                href="/seniors"
+                className="px-5 py-3 text-lg font-semibold rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors"
+              >
+                프로필 조회·수정
+              </Link>
+              <Link
                 href="/recommendations"
                 className="px-5 py-3 text-lg font-semibold rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-colors"
               >
