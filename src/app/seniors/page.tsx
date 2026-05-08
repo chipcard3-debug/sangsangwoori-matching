@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { supabase } from '@/lib/supabase'
-import { Pencil, Trash2, Check, X } from 'lucide-react'
+import { Pencil, Trash2, Check, X, Search } from 'lucide-react'
 
 const REGIONS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '기타'] as const
 const JOB_TYPES = ['경비', '청소', '조리', '돌봄', '기타'] as const
@@ -25,6 +25,7 @@ const EDIT_SELECT_CLS =
 export default function SeniorsPage() {
   const [seniors, setSeniors] = useState<Senior[]>([])
   const [loadingList, setLoadingList] = useState(false)
+  const [query, setQuery] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editRegion, setEditRegion] = useState('')
@@ -77,10 +78,41 @@ export default function SeniorsPage() {
     setConfirmDeleteId(null)
   }
 
+  const filtered = seniors.filter((s) => {
+    const q = query.trim().toLowerCase()
+    if (!q) return true
+    return (
+      s.name.toLowerCase().includes(q) ||
+      s.region.toLowerCase().includes(q) ||
+      s.desired_job.toLowerCase().includes(q)
+    )
+  })
+
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-4xl font-bold mb-2 text-gray-900">프로필 조회·수정</h1>
-      <p className="text-xl text-gray-600 mb-8">등록된 시니어 프로필을 확인하고 수정하세요.</p>
+      <p className="text-xl text-gray-600 mb-6">등록된 시니어 프로필을 확인하고 수정하세요.</p>
+
+      {/* 검색창 */}
+      <div className="relative mb-8">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 pointer-events-none" />
+        <input
+          type="text"
+          placeholder="이름·지역·직종으로 검색"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full h-14 text-xl border-2 border-gray-300 rounded-xl pr-4 focus:outline-none focus:border-blue-500"
+          style={{ paddingLeft: '3.25rem' }}
+        />
+        {query && (
+          <button
+            onClick={() => setQuery('')}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
 
       <div className="space-y-4">
         {loadingList ? (
@@ -89,8 +121,13 @@ export default function SeniorsPage() {
           <div className="p-6 bg-yellow-50 border-2 border-yellow-300 rounded-xl text-yellow-800 text-xl">
             등록된 프로필이 없습니다.
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="p-6 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-600 text-xl">
+            <Search className="inline w-6 h-6 mr-2 text-gray-400" />
+            &quot;{query}&quot; 에 해당하는 프로필이 없습니다.
+          </div>
         ) : (
-          seniors.map((s) =>
+          filtered.map((s) =>
             editingId === s.id ? (
               <Card key={s.id} className="border-2 border-blue-300 shadow-md">
                 <CardHeader className="pb-3">
