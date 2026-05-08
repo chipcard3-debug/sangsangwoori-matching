@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { supabase } from '@/lib/supabase'
 import { Pencil, Trash2, Check, X } from 'lucide-react'
 
-const REGIONS = ['서울', '경기', '인천', '기타'] as const
+const REGIONS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '기타'] as const
 const JOB_TYPES = ['경비', '청소', '조리', '돌봄', '기타'] as const
 
 type Senior = {
