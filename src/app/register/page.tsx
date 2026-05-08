@@ -1,21 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { supabase } from '@/lib/supabase'
+import { MapPin, Briefcase, Clock, User, CheckCircle2, ChevronRight } from 'lucide-react'
 
 const REGIONS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '기타'] as const
 const JOB_TYPES = ['경비', '청소', '조리', '돌봄', '기타'] as const
 
 type FormErrors = Partial<Record<'name' | 'region' | 'desired_job', string>>
-
-const SELECT_CLS = (hasError: boolean) =>
-  `w-full h-14 text-xl border-2 rounded-lg px-4 bg-white focus:outline-none focus:border-blue-500 ${
-    hasError ? 'border-red-400' : 'border-gray-300'
-  }`
 
 export default function RegisterPage() {
   const [name, setName] = useState('')
@@ -70,115 +62,164 @@ export default function RegisterPage() {
     setErrors({})
   }
 
-  return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-4xl font-bold mb-2 text-gray-900">시니어 일자리 신청하기</h1>
-      <p className="text-xl text-gray-600 mb-8">정보를 입력하시면 맞춤 일자리를 연결해 드립니다.</p>
-
-      {success && (
-        <div className="mb-6 p-5 bg-green-50 border-2 border-green-500 rounded-xl text-green-800 text-xl font-semibold">
-          ✓ 등록이 완료되었습니다. 담당자가 곧 연락드립니다
+  if (success) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="text-center space-y-6 px-4">
+          <div className="flex justify-center">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-200">
+              <CheckCircle2 className="w-10 h-10 text-white" />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">등록 완료!</h2>
+            <p className="text-lg text-gray-500">담당자가 곧 연락드립니다.</p>
+          </div>
+          <button
+            onClick={() => setSuccess(false)}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-lg hover:opacity-90 transition-opacity shadow-md"
+          >
+            추가 등록하기 <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
-      )}
+      </div>
+    )
+  }
 
-      <Card className="border-2 border-gray-200 shadow-md">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-2xl text-gray-800">기본 정보 입력</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+  return (
+    <div className="max-w-xl mx-auto">
 
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-xl font-semibold text-gray-800">
-                이름 <span className="text-red-500">*</span>
-              </Label>
-              <p className="text-lg text-gray-500">성함을 알려주세요.</p>
-              {errors.name && (
-                <div className="p-3 bg-red-50 border-2 border-red-400 rounded-lg text-red-700 text-lg font-medium">
-                  {errors.name}
-                </div>
-              )}
-              <Input
-                id="name"
-                type="text"
-                placeholder="홍길동"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={`h-14 text-xl border-2 rounded-lg px-4 ${
-                  errors.name ? 'border-red-400' : 'border-gray-300'
-                }`}
-              />
-            </div>
+      {/* ── 헤더 ── */}
+      <div className="mb-10 text-center">
+        <span className="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-base font-semibold mb-4 border border-blue-100">
+          일자리 신청
+        </span>
+        <h1 className="text-4xl font-extrabold text-gray-900 leading-tight mb-3">
+          맞춤 일자리를<br />
+          <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+            지금 바로 신청하세요
+          </span>
+        </h1>
+        <p className="text-lg text-gray-500">
+          정보를 입력하시면 딱 맞는 일자리를 연결해 드립니다.
+        </p>
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="region" className="text-xl font-semibold text-gray-800">
-                지역 <span className="text-red-500">*</span>
-              </Label>
-              <p className="text-lg text-gray-500">어디에서 일하고 싶으세요?</p>
-              {errors.region && (
-                <div className="p-3 bg-red-50 border-2 border-red-400 rounded-lg text-red-700 text-lg font-medium">
-                  {errors.region}
-                </div>
-              )}
-              <select
-                id="region"
-                value={region}
-                onChange={(e) => setRegion(e.target.value)}
-                className={SELECT_CLS(!!errors.region)}
-              >
-                <option value="">선택해 주세요</option>
-                {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-              </select>
-            </div>
+      {/* ── 폼 카드 ── */}
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
 
-            <div className="space-y-2">
-              <Label htmlFor="desired_job" className="text-xl font-semibold text-gray-800">
-                희망 직종 <span className="text-red-500">*</span>
-              </Label>
-              <p className="text-lg text-gray-500">어떤 일을 하시겠어요?</p>
-              {errors.desired_job && (
-                <div className="p-3 bg-red-50 border-2 border-red-400 rounded-lg text-red-700 text-lg font-medium">
-                  {errors.desired_job}
-                </div>
-              )}
-              <select
-                id="desired_job"
-                value={desiredJob}
-                onChange={(e) => setDesiredJob(e.target.value)}
-                className={SELECT_CLS(!!errors.desired_job)}
-              >
-                <option value="">선택해 주세요</option>
-                {JOB_TYPES.map((j) => <option key={j} value={j}>{j}</option>)}
-              </select>
-            </div>
+        {/* 카드 상단 그라디언트 바 */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
 
-            <div className="space-y-2">
-              <Label htmlFor="career_years" className="text-xl font-semibold text-gray-800">
-                경력 (년)
-              </Label>
-              <p className="text-lg text-gray-500">일하신 경력이 몇 년인가요? (없으면 0)</p>
-              <Input
-                id="career_years"
-                type="number"
-                placeholder="10"
-                min={0}
-                value={careerYears}
-                onChange={(e) => setCareerYears(e.target.value)}
-                className="h-14 text-xl border-2 border-gray-300 rounded-lg px-4"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="p-8 space-y-7">
 
-            <Button
-              type="submit"
-              size="lg"
-              disabled={submitting}
-              className="w-full h-16 text-2xl font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
+          {/* 이름 */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-base font-semibold text-gray-700">
+              <User className="w-4 h-4 text-blue-500" />
+              이름 <span className="text-red-500">*</span>
+            </label>
+            {errors.name && (
+              <p className="text-sm text-red-500 font-medium">{errors.name}</p>
+            )}
+            <input
+              type="text"
+              placeholder="홍길동"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={`w-full h-13 text-xl px-4 py-3 rounded-xl border-2 outline-none transition-all duration-200 bg-gray-50 focus:bg-white focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.12)] ${
+                errors.name ? 'border-red-400 bg-red-50' : 'border-gray-200'
+              }`}
+            />
+          </div>
+
+          {/* 지역 */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-base font-semibold text-gray-700">
+              <MapPin className="w-4 h-4 text-blue-500" />
+              지역 <span className="text-red-500">*</span>
+            </label>
+            {errors.region && (
+              <p className="text-sm text-red-500 font-medium">{errors.region}</p>
+            )}
+            <select
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className={`w-full h-13 text-xl px-4 py-3 rounded-xl border-2 outline-none transition-all duration-200 bg-gray-50 focus:bg-white focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.12)] appearance-none cursor-pointer ${
+                errors.region ? 'border-red-400 bg-red-50' : 'border-gray-200'
+              }`}
             >
-              {submitting ? '저장 중...' : '등록하기'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+              <option value="">어디에서 일하고 싶으세요?</option>
+              {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+
+          {/* 희망 직종 */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-base font-semibold text-gray-700">
+              <Briefcase className="w-4 h-4 text-blue-500" />
+              희망 직종 <span className="text-red-500">*</span>
+            </label>
+            {errors.desired_job && (
+              <p className="text-sm text-red-500 font-medium">{errors.desired_job}</p>
+            )}
+            <div className="grid grid-cols-5 gap-2">
+              {JOB_TYPES.map((j) => (
+                <button
+                  key={j}
+                  type="button"
+                  onClick={() => setDesiredJob(j)}
+                  className={`py-3 rounded-xl text-base font-semibold border-2 transition-all duration-150 ${
+                    desiredJob === j
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200 scale-105'
+                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600'
+                  }`}
+                >
+                  {j}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 경력 */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-base font-semibold text-gray-700">
+              <Clock className="w-4 h-4 text-blue-500" />
+              경력 (년)
+              <span className="text-gray-400 font-normal text-sm">— 없으면 0</span>
+            </label>
+            <input
+              type="number"
+              placeholder="0"
+              min={0}
+              value={careerYears}
+              onChange={(e) => setCareerYears(e.target.value)}
+              className="w-full h-13 text-xl px-4 py-3 rounded-xl border-2 border-gray-200 outline-none transition-all duration-200 bg-gray-50 focus:bg-white focus:border-blue-500 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.12)]"
+            />
+          </div>
+
+          {/* 제출 버튼 */}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full py-4 rounded-xl text-xl font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 active:scale-[0.98] transition-all duration-150 shadow-lg shadow-blue-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {submitting ? (
+              '저장 중...'
+            ) : (
+              <>
+                등록하기 <ChevronRight className="w-5 h-5" />
+              </>
+            )}
+          </button>
+
+        </form>
+      </div>
+
+      {/* 하단 안내 */}
+      <p className="text-center text-gray-400 text-base mt-6">
+        등록 후 담당자가 직접 연락드립니다.
+      </p>
     </div>
   )
 }
