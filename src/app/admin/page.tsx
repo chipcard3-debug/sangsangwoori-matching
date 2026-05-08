@@ -69,6 +69,7 @@ export default function AdminPage() {
   // Seniors
   const [seniors, setSeniors] = useState<Senior[]>([])
   const [loadingSeniors, setLoadingSeniors] = useState(true)
+  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set())
 
   // Jobs
   const [jobs, setJobs] = useState<Job[]>([])
@@ -164,6 +165,27 @@ export default function AdminPage() {
     setJobCareer('')
     setJobFormErrors({})
     await Promise.all([fetchJobs(), fetchSeniors()])
+  }
+
+  const handleAssign = async (seniorId: string) => {
+    setTogglingIds((prev) => new Set([...prev, seniorId]))
+    await supabase
+      .from('matches')
+      .update({ status: 'assigned' })
+      .eq('senior_id', seniorId)
+      .gt('score', 0)
+    await fetchSeniors()
+    setTogglingIds((prev) => { const s = new Set(prev); s.delete(seniorId); return s })
+  }
+
+  const handleCancelAssign = async (seniorId: string) => {
+    setTogglingIds((prev) => new Set([...prev, seniorId]))
+    await supabase
+      .from('matches')
+      .update({ status: 'pending' })
+      .eq('senior_id', seniorId)
+    await fetchSeniors()
+    setTogglingIds((prev) => { const s = new Set(prev); s.delete(seniorId); return s })
   }
 
   const handleDeleteJob = async (id: string) => {
@@ -282,11 +304,34 @@ export default function AdminPage() {
                           <span className="text-gray-500 text-base ml-1">점</span>
                         </td>
                         <td className="py-4 px-4">
-                          <span
-                            className={`px-3 py-1 rounded-full text-base font-semibold ${cls}`}
-                          >
-                            {label}
-                          </span>
+                          {status === 'pending' ? (
+                            <button
+                              onClick={() => handleAssign(s.id)}
+                              disabled={togglingIds.has(s.id)}
+                              className="px-3 py-1 rounded-full text-base font-semibold bg-yellow-100 text-yellow-800 border-2 border-yellow-300 hover:bg-yellow-400 hover:text-white hover:border-yellow-400 hover:shadow-md hover:scale-105 transition-all duration-150 disabled:opacity-50"
+                              title="클릭하면 배정 완료로 변경"
+                            >
+                              {togglingIds.has(s.id) ? '처리 중…' : '매칭 대기 →'}
+                            </button>
+                          ) : status === 'assigned' ? (
+                            <div className="flex items-center gap-2">
+                              <span className="px-3 py-1 rounded-full text-base font-semibold bg-green-100 text-green-800">
+                                배정 완료
+                              </span>
+                              <button
+                                onClick={() => handleCancelAssign(s.id)}
+                                disabled={togglingIds.has(s.id)}
+                                className="px-2 py-1 rounded-lg text-sm font-semibold border-2 border-red-300 text-red-600 bg-white hover:bg-red-600 hover:text-white hover:border-red-600 hover:shadow-md hover:scale-105 transition-all duration-150 disabled:opacity-50"
+                                title="클릭하면 매칭 대기로 되돌림"
+                              >
+                                {togglingIds.has(s.id) ? '…' : '매칭 취소'}
+                              </button>
+                            </div>
+                          ) : (
+                            <span className={`px-3 py-1 rounded-full text-base font-semibold ${cls}`}>
+                              {label}
+                            </span>
+                          )}
                         </td>
                         <td className="py-4 px-4">
                           <Link href={`/recommendations?senior_id=${s.id}`}>
