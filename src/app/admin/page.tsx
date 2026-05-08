@@ -55,7 +55,7 @@ function statusInfo(s: DerivedStatus): { label: string; cls: string } {
   return { label: '미매칭', cls: 'bg-gray-100 text-gray-600' }
 }
 
-const REGIONS = ['서울', '경기', '인천', '기타'] as const
+const REGIONS = ['서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '기타'] as const
 const JOB_TYPES = ['경비', '청소', '조리', '돌봄', '기타'] as const
 
 const SELECT_CLS = (err: boolean) =>
