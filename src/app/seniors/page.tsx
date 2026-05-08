@@ -174,7 +174,7 @@ export default function SeniorsPage() {
                       <Button
                         type="button"
                         onClick={() => { setConfirmDeleteId(null); startEdit(s) }}
-                        className="h-11 px-4 text-base font-semibold border-2 border-blue-300 text-blue-700 bg-white hover:bg-blue-50 rounded-xl"
+                        className="h-11 px-4 text-base font-semibold border-2 border-blue-400 text-blue-700 bg-white hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md hover:scale-105 transition-all duration-150 rounded-xl"
                       >
                         <Pencil className="w-4 h-4 mr-1" />
                         수정
@@ -183,7 +183,7 @@ export default function SeniorsPage() {
                         <Button
                           type="button"
                           onClick={() => deleteSenior(s.id)}
-                          className="h-11 px-4 text-base font-bold bg-red-600 hover:bg-red-700 text-white rounded-xl"
+                          className="h-11 px-4 text-base font-bold bg-red-600 hover:bg-red-700 hover:shadow-md hover:scale-105 transition-all duration-150 text-white rounded-xl"
                         >
                           <Trash2 className="w-4 h-4 mr-1" />
                           삭제 확인
@@ -192,7 +192,7 @@ export default function SeniorsPage() {
                         <Button
                           type="button"
                           onClick={() => { setEditingId(null); setConfirmDeleteId(s.id) }}
-                          className="h-11 px-4 text-base font-semibold border-2 border-red-300 text-red-600 bg-white hover:bg-red-50 rounded-xl"
+                          className="h-11 px-4 text-base font-semibold border-2 border-red-400 text-red-600 bg-white hover:bg-red-600 hover:text-white hover:border-red-600 hover:shadow-md hover:scale-105 transition-all duration-150 rounded-xl"
                         >
                           <Trash2 className="w-4 h-4 mr-1" />
                           삭제

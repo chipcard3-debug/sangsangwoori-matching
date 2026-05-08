@@ -293,7 +293,7 @@ export default function AdminPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-base font-semibold border-2 border-blue-300 text-blue-700 hover:bg-blue-50"
+                              className="text-base font-semibold border-2 border-blue-400 text-blue-700 bg-white hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-md hover:scale-105 transition-all duration-150"
                             >
                               상세 보기
                             </Button>
