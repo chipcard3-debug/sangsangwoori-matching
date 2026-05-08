@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,7 +30,7 @@ const EDIT_SELECT_CLS =
 
 export default function RegisterPage() {
   // ── 탭 ────────────────────────────────────────────────
-  const [tab, setTab] = useState<'form' | 'list'>('form')
+  const [tab, setTab] = useState<'form' | 'list'>('list')
 
   // ── 등록 폼 ───────────────────────────────────────────
   const [name, setName] = useState('')
@@ -102,6 +102,8 @@ export default function RegisterPage() {
     setLoadingList(false)
     if (data) setSeniors(data as Senior[])
   }, [])
+
+  useEffect(() => { fetchSeniors() }, [fetchSeniors])
 
   const switchTab = (t: 'form' | 'list') => {
     setTab(t)
