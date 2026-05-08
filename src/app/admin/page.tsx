@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { AlertTriangle, Clock, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -193,6 +194,7 @@ export default function AdminPage() {
             sub: '매칭 없거나 전부 0점',
             border: 'border-red-200 bg-red-50',
             text: 'text-red-700',
+            Icon: AlertTriangle,
           },
           {
             label: '매칭 대기',
@@ -200,6 +202,7 @@ export default function AdminPage() {
             sub: '매칭 있음 · pending',
             border: 'border-yellow-200 bg-yellow-50',
             text: 'text-yellow-700',
+            Icon: Clock,
           },
           {
             label: '배정 완료',
@@ -207,11 +210,15 @@ export default function AdminPage() {
             sub: 'assigned / done',
             border: 'border-green-200 bg-green-50',
             text: 'text-green-700',
+            Icon: CheckCircle2,
           },
         ].map((c) => (
           <Card key={c.label} className={`border-2 ${c.border}`}>
             <CardContent className="pt-6 pb-5">
-              <p className={`text-lg font-semibold ${c.text}`}>{c.label}</p>
+              <div className="flex items-center gap-2 mb-1">
+                <c.Icon className={`w-6 h-6 ${c.text}`} />
+                <p className={`text-lg font-semibold ${c.text}`}>{c.label}</p>
+              </div>
               <p className="text-5xl font-bold text-gray-900 mt-2">
                 {loadingSeniors ? '…' : c.count}
               </p>

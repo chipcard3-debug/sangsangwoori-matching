@@ -72,12 +72,12 @@ export default function RegisterPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-4xl font-bold mb-2 text-gray-900">시니어 프로필 등록</h1>
-      <p className="text-xl text-gray-600 mb-8">정보를 입력하시면 맞춤 일자리를 추천해 드립니다.</p>
+      <h1 className="text-4xl font-bold mb-2 text-gray-900">시니어 일자리 신청하기</h1>
+      <p className="text-xl text-gray-600 mb-8">정보를 입력하시면 맞춤 일자리를 연결해 드립니다.</p>
 
       {success && (
         <div className="mb-6 p-5 bg-green-50 border-2 border-green-500 rounded-xl text-green-800 text-xl font-semibold">
-          ✓ 등록이 완료되었습니다
+          ✓ 등록이 완료되었습니다. 담당자가 곧 연락드립니다
         </div>
       )}
 
@@ -93,6 +93,7 @@ export default function RegisterPage() {
               <Label htmlFor="name" className="text-xl font-semibold text-gray-800">
                 이름 <span className="text-red-500">*</span>
               </Label>
+              <p className="text-lg text-gray-500">성함을 알려주세요.</p>
               {errors.name && (
                 <div className="p-3 bg-red-50 border-2 border-red-400 rounded-lg text-red-700 text-lg font-medium">
                   {errors.name}
@@ -115,6 +116,7 @@ export default function RegisterPage() {
               <Label htmlFor="region" className="text-xl font-semibold text-gray-800">
                 지역 <span className="text-red-500">*</span>
               </Label>
+              <p className="text-lg text-gray-500">어디에서 일하고 싶으세요?</p>
               {errors.region && (
                 <div className="p-3 bg-red-50 border-2 border-red-400 rounded-lg text-red-700 text-lg font-medium">
                   {errors.region}
@@ -136,6 +138,7 @@ export default function RegisterPage() {
               <Label htmlFor="desired_job" className="text-xl font-semibold text-gray-800">
                 희망 직종 <span className="text-red-500">*</span>
               </Label>
+              <p className="text-lg text-gray-500">어떤 일을 하시겠어요?</p>
               {errors.desired_job && (
                 <div className="p-3 bg-red-50 border-2 border-red-400 rounded-lg text-red-700 text-lg font-medium">
                   {errors.desired_job}
@@ -157,6 +160,7 @@ export default function RegisterPage() {
               <Label htmlFor="career_years" className="text-xl font-semibold text-gray-800">
                 경력 (년)
               </Label>
+              <p className="text-lg text-gray-500">일하신 경력이 몇 년인가요? (없으면 0)</p>
               <Input
                 id="career_years"
                 type="number"
@@ -174,7 +178,7 @@ export default function RegisterPage() {
               disabled={submitting}
               className="w-full h-16 text-2xl font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
             >
-              {submitting ? '저장 중...' : '프로필 등록하기'}
+              {submitting ? '저장 중...' : '등록하기'}
             </Button>
           </form>
         </CardContent>

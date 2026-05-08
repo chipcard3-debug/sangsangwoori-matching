@@ -33,6 +33,13 @@ function scoreBadgeCls(score: number): string {
   return 'bg-gray-100 text-gray-600'
 }
 
+function scoreLabel(score: number): string {
+  if (score === 6) return '매우 적합'
+  if (score >= 4) return '적합'
+  if (score >= 2) return '보통'
+  return ''
+}
+
 function statusLabel(status: string): string {
   if (status === 'assigned') return '배정 완료'
   if (status === 'done') return '완료'
@@ -126,11 +133,12 @@ export default function RecommendationsList() {
         ← 다른 시니어 보기
       </button>
 
-      <h1 className="text-4xl font-bold mb-2 text-gray-900">추천 일자리 목록</h1>
+      <h1 className="text-4xl font-bold mb-2 text-gray-900">
+        {senior ? `${senior.name} 님께 맞는 일자리` : '추천 일자리 목록'}
+      </h1>
       {senior && (
         <p className="text-xl text-gray-600 mb-8">
-          <span className="font-bold text-gray-900">{senior.name}</span>님 (
-          {senior.region} · {senior.desired_job} · 경력 {senior.career_years}년)
+          {senior.region} · {senior.desired_job} · 경력 {senior.career_years}년
         </p>
       )}
 
@@ -139,6 +147,9 @@ export default function RecommendationsList() {
       ) : matches.length === 0 ? (
         <div className="p-6 bg-blue-50 border-2 border-blue-300 rounded-xl text-blue-800 text-xl font-semibold">
           현재 매칭되는 일자리가 없습니다.
+          <p className="text-lg font-medium mt-2">
+            담당자가 직접 연락드리니 잠시만 기다려 주세요.
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -152,11 +163,18 @@ export default function RecommendationsList() {
                   <CardTitle className="text-2xl text-gray-900">
                     #{i + 1}&nbsp;{m.jobs?.title ?? '—'}
                   </CardTitle>
-                  <span
-                    className={`px-5 py-2 text-xl font-bold rounded-full ${scoreBadgeCls(m.score)}`}
-                  >
-                    {m.score}점
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`px-5 py-2 text-xl font-bold rounded-full ${scoreBadgeCls(m.score)}`}
+                    >
+                      {m.score}점
+                    </span>
+                    {scoreLabel(m.score) && (
+                      <span className="text-base font-semibold text-gray-500">
+                        {scoreLabel(m.score)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
